@@ -11,12 +11,14 @@ It is intended to be used by developers to display vulnerability information for
 The script is intended to be a drop-in extension of the contrast-cli tool. At present it only supports a subset of parameters:
 
 ```sh
-./contrast-sca.sh  --cli_api_key <YourAPIKey> \ 
- --cli_authorization <YourAuthorizationKey> \ 
- --cli_organization_id <YourOrganizationID> \ 
+./contrast-sca.sh  --cli_api_key <YourAPIKey> \
+ --cli_authorization <YourAuthorizationKey> \
+ --cli_organization_id <YourOrganizationID> \
  --cli_host <YourHost, e.g. eval.contrastsecurity.com> \
  --cli_application_name <YourApplicationName> \
- --cli_language <JAVA, DOTNET, NODE, PYTHON OR RUBY>
+ --cli_application_id <YourApplicationId, optional> \
+ --cli_language <JAVA, DOTNET, NODE, PYTHON OR RUBY> \
+ --cli_project_path <Relative path to the App>
 ```
 
 The script will perform the following actions:
@@ -46,8 +48,8 @@ Please note that the current contrast-cli tool is being extended to provide this
 
 
 
-DISCLAIMER
-----------
+## Disclaimer
+
 Please note: all tools/ scripts in this repo are released for use "AS IS" **without any warranties of any kind**,
 including, but not limited to their installation, use, or performance.  We disclaim any and all warranties, either 
 express or implied, including but not limited to any warranty of noninfringement, merchantability, and/ or fitness 
