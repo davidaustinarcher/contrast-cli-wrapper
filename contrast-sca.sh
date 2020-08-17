@@ -12,8 +12,9 @@ cli_organization_id=${cli_organization_id:-}
 cli_host=${cli_host:-}
 cli_application_name=${cli_application_name:-}
 cli_language=${cli_language:-}
-cli_project_path=${cli_project_path:-./}
+cli_project_path=${cli_project_path:-}
 cli_application_id=${cli_application_id:-}
+remove_application=${remove_application:-}
 
 while [ $# -gt 0 ]; do
 
@@ -34,7 +35,7 @@ then
     --cli_host $cli_host \
     --cli_application_name $cli_application_name \
     --cli_language $cli_language \
-    --cli_project_path $cli_project_path \
+    ${cli_project_path:+ --cli_project_path "${cli_project_path}"} \
     --cli_catalogue_application)
 
     #If the app was created, grab the Id
@@ -52,8 +53,8 @@ then
             #Something else, bail out
             printf "${red}Unexpected response: $result${normal}\n"
             exit
-        fi 
-    fi 
+        fi
+    fi
 
     echo "The Application Id for $cli_application_name is $APP_ID"
 else
@@ -66,7 +67,7 @@ result=$(contrast-cli --cli_api_key $cli_api_key \
 --cli_authorization $cli_authorization \
 --cli_organization_id $cli_organization_id \
 --cli_host $cli_host \
---cli_project_path $cli_project_path \
+${cli_project_path:+ --cli_project_path "${cli_project_path}"} \
 --cli_application_id $APP_ID)
 
 if [[ ${result} =~ "SUCCESS" ]]
@@ -77,7 +78,7 @@ else
     exit
 fi
 
-#Fetch the list of libraries 
+#Fetch the list of libraries
 echo "Fetching libraries from the Contrast API"
 
 
@@ -98,9 +99,6 @@ libs=$(curl --silent --location --request PUT "https://$cli_host/Contrast/api/ng
 --header 'Content-Type: application/json' \
 --header "Authorization: $cli_authorization" \
 --data-raw "$payload")
-
-echo $payload > payload.json
-echo $libs > libs.json
 
 #Remove some invalid chars from json
 libs=$(echo $libs| sed 's/\\\\//g') #\\
@@ -144,18 +142,39 @@ else
 
         if [[ $severity_code == "HIGH" ]]
         then
-            printf "${red}$severity_code ($severity_value)${normal}"    
-        else 
+            printf "${red}$severity_code ($severity_value)${normal}"
+        else
             if [[ $severity_code == "MEDIUM" ]]
             then
-                printf "${yellow}$severity_code ($severity_value)${normal}"    
-            else 
+                printf "${yellow}$severity_code ($severity_value)${normal}"
+            else
                 printf "$severity_code ($severity_value)"
             fi
         fi
-        echo -e " $cve: $description\n" | fmt -w 200
+        echo -e " $cve: $description\n" | fmt #-w 200
     done
 
     printf "${green}Found ${normal}$cve_count${green} CVEs within ${normal}$vuln_count${green} vulnerable libraries${normal}\n"
 fi
-printf "You can view the hierarchy tree here: https://$cli_host/Contrast/static/ng/index.html#/$cli_organization_id/applications/$APP_ID/libs/dependency-tree\n"
+
+if [[ $remove_application == true ]]
+then
+    echo "Archiving application"
+    result=$(curl --silent --location --request PUT "https://$cli_host/Contrast/api/ng/$cli_organization_id/applications/$APP_ID/archive" \
+    --header "API-Key: $cli_api_key" \
+    --header "Accept: application/json" \
+    --header "Authorization: $cli_authorization")
+
+    echo $result
+
+    echo "Deleting application"
+    result=$(curl --silent --location --request DELETE "https://$cli_host/Contrast/api/ng/$cli_organization_id/applications/$APP_ID" \
+    --header "API-Key: $cli_api_key" \
+    --header "Accept: application/json" \
+    --header "Authorization: $cli_authorization")
+
+    echo $result
+
+else
+    printf "You can view the hierarchy tree here: https://$cli_host/Contrast/static/ng/index.html#/$cli_organization_id/applications/$APP_ID/libs/dependency-tree\n"
+fi

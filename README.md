@@ -18,7 +18,8 @@ The script is intended to be a drop-in extension of the contrast-cli tool. At pr
  --cli_application_name <YourApplicationName> \
  --cli_application_id <YourApplicationId, optional> \
  --cli_language <JAVA, DOTNET, NODE, PYTHON OR RUBY> \
- --cli_project_path <Relative path to the App>
+ --cli_project_path <Relative path to the App> \
+ --remove_application <true (without quotes) to remove the application after reporting>
 ```
 
 The script will perform the following actions:
@@ -28,6 +29,7 @@ The script will perform the following actions:
 1. Fetch the libraries back from the Contrast API.
 1. Send the libraries to the API for analysis.
 1. Detail the results in the command line.
+1. Optionally delete the application if the remove_application is set to true 
 
 ### Prerequisites
 
